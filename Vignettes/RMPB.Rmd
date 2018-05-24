@@ -1,0 +1,144 @@
+---
+title: "RMPB Package Tutorial"
+author: "<a href= http://henokuga@gmail.com>Henok Woldu </a>"
+date: "`r Sys.Date()`"
+output: 
+   rmarkdown::html_vignette:
+   fig_caption: yes
+   css: rmpbvignettestyle.css
+   
+vignette: >
+  %\VignetteIndexEntry{RMPB}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Summary
+In the medical field, one would always be interested to assess if a new methods or a new instrument can replace an existing one. The motivation for this can be the new method/instrument is less expensive, less time consuming, doesn't need a highly skilled personnel. However, for the new method/instrument to replace the old (mainly considered as a gold standard), one need to make sure that the new results replicate/reproduce the old results. Package _RMPB_ is used to assess the reproducibility of a predictive biomarker's clinical utility when an orginal biomarker $X$ is replaced with a modified biomarker $W$.
+
+
+## Package description
+
+The package consisits of several functions that help to caculate the reproducibility metric $\Delta_r$. This package is written in such a way that users can even generate a hypothetical data using the **datgen** function in case they don not have data at hand. To simulate under different scenarios, users can use the **cl2mp** function to change what we called _clinician inputs_ to _model parameters_. Estimation of $\Delta_r$ needs  estimation of $\Theta_{gs}$ and $\Theta_{mod}$ respectively. $\Theta_{gs}$ is a metric that measures the decrease the proportion of an event of interest as a result of a biomarer guided treatment when the _gold standard_ biomarker is observed and  $\Theta_{mod}$ measures the same thing assuming the _modified assay (biomarker)_ is observed.
+
+
+## Intended audience and goal of the package
+
+The main audience of this package are individuals who want to learn how to evaluate the clinical utility of a predictive biomarker. Though it is not a necessary requirement, but having some basic background about predictive biomarkers and their assesment statistical methods can facilitate understanding this package with ease. Audience who are more interested to know about the statistical methods used can read the paper at.......
+
+
+## Using this package
+
+The following sections describe the main steps to follow in order to use this package.
+
+
+### Install the package
+
+It is not yet on CRAN, but once it is available it can be installed and used as
+
+```{r, eval=FALSE , echo=T}
+ 
+install.packages("RMPB")  # install it first 
+   
+library(RMPB)             # load the package 
+
+```
+
+
+The very updated version of this package can be obtained from my _github_ website. To install it from my github, the `devtools` package is first needed to be install. Here is how you can install it from github:
+
+```{r, eval=FALSE, echo=TRUE}
+install.packages("devtools")  # install the devtools package if you have not done it before.
+
+library(devtools)            # load the package devtools
+
+# to install the RMPB from my github acount ("henok535/RMPB")
+
+install_github("henok535/RMPB")
+
+library(RMPB)     
+ 
+# Well come to RMPB package. It is now ready for use!
+
+```
+
+
+## Example of data simulation
+
+Here we first show how to generate a data fit for the intended purpose. In case one has a repoducibility data set at hand,
+they can be directly used as long as they are standardized to have the desired column names.
+
+```{r}
+library(RMPB)   # load the package 
+
+       dispar <- c(4.8, 1.8)  # mean and sd of the predictive biomarker 
+
+# change clinician inputs to model parameters
+
+   bmrk <- rnorm(10000, dispar[1], dispar[2]) # generate the biomarker 
+   bmrkquant <- quantile(bmrk)              # quantiles of the generated biomarker
+   clinInput1 <- c(log(0.25/0.75), log(0.75/0.25), log(0.75/0.25), log(0.25/0.75)) # clinician input values
+   coeffmod <- cl2mp(clinInput1, c(bmrkquant[2], bmrkquant[4]))   # change the clinician inputs to model parameters
+ 
+
+ # biomarker used to mimic the oncotype Dx recurrence score
+
+     varerr <- 0.6              # variance of the error term
+     sderr <- sqrt(varerr)      # standard deviation of the error term
+     coff <- coeffmod           # coefficient to start the simulation to generate data
+     dpar1 <- c(4.8, 1.8, sderr)  # all the parameters in all : mean and sd of the biomarker and sd of the error
+     dpar2 <- c(4.8, 3.24)       # mean and variance of the bimarker
+
+ # generate data
+        mydat <- datgen(500, 300, coff, dpar1) # generate 500 data set each with 300 sample size
+        head(mydat[[1]])                    # print the first 10 observation from the first data set
+```
+
+
+## Estimating $\Delta_r$
+
+Assuming we already have generated data as in the above procedure, or we have our own  reproducibility data, estimatig of $\Delta_r$ 
+can proceed in the following manner:
+
+### Estimate $\Theta_{gs}$
+ Assuming the observed biomarker is the gold standard, the metric $\Theta$ which measures the decrease in the expected proportion of 
+ unfavorable even under the biomarker guided treatment is estimated as follows:
+
+```{r}
+
+# estimate theta from the gold standard assay
+
+ casex1 <- lapply(mydat, thetags, dpar2)
+ casex2 <- do.call("rbind", casex1)
+ thetax <- c(round(colMeans(casex2), digits = 3))
+ thetax
+
+```
+
+### Estimate $\Theta_{mod}$
+ Assuming the observed biomarker is the modified assay, the metric $\Theta$ which measures the decrease in the expected proportion of 
+ unfavorable even under the biomarker guided treatment is estimated as follows:
+ 
+```{r}
+
+# estimate theta from modified assay
+casemc1 <- lapply(mydat, thetama)
+ casemc2 <- do.call("rbind", casemc1)
+ thetamod <- c(round(colMeans(casemc2), digits = 3))
+ thetamod
+ 
+```
+ 
+Finally we can get an estimate of the reproducibility metric $\Delta_R$ as:
+
+```{r}
+ # estimating delta
+
+ delta10 <- lapply(mydat, delta4r, dpar2)
+ delta10 <- do.call("rbind", delta10)
+ delta11 <- c(round(colMeans(delta10), digits = 3))
+ delta11
+ 
+```
+
+

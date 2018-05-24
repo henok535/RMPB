@@ -1,0 +1,31 @@
+Package: RMPB
+Type: Package
+Title: Reproducibility Metric for Predictive Biomarker
+Description: Used to estimate a metric for assessing the reproductibility of a predictive 
+    biomarker when an original gold standard biomarker is modified for a number of 
+    different reasons.
+Version: 0.1.0
+Date: 2018-5-14
+Authors@R: c(
+    person("Henok", "Woldu", email = "henokuga@gmail.com", role = c("aut", "cre")),
+	person("Kevin", "Dobbin",  role = "ctb") 
+	#person("Sxx", "yy",  role = "ctb"),  add other contributers
+	)
+Maintainer: Henok Woldu <henokuga@gmail.com>
+License: GPL-3
+LazyData: TRUE
+Imports:
+    stats,
+    knitr (>= 1.15),
+    utils
+Depends:
+    R (>= 2.10),
+    shiny (>= 1.0)
+Suggests:
+    rmarkdown,
+    testthat
+RoxygenNote: 6.0.1
+VignetteBuilder: knitr
+URL: https://github.com/henok535
+BugReports:  https://github.com/henok535
+
