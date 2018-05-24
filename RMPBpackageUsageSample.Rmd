@@ -1,0 +1,128 @@
+---
+title: "Using the RMPB package"
+author: "Henok"
+date: "May 23, 2018"
+output: html_document
+---
+
+# Package RMPB Usage
+
+A practical demostration of using the ~RMPB Package~ is outlined in the following steps. Using a reproducibility data from the 
+KI67 study, we generated a hypothetical data from the logistic regression model used in our work. Parameters used to generate a sample 
+for a normal distribution for the biomarker are taken from the KI67 reproducibility study.
+
+## Loading the required packages 
+
+```{r setup, include=FALSE}
+
+library(RMPB)       # this is the main package 
+library(truncnorm)  # used to generate sample from a truncated nommal
+```
+
+
+## Reading the KI67 Reproducibility Data 
+This is the KI67 reproducibility data. The data do not have an outcome and a treatment assignment. 
+
+```{r}
+
+setwd("C:/Users/henok535/Desktop/ThesisLatest/chapt5/ReprodDat") # change the workign directory to the folder containging the data set
+dat1 <- read.csv("Exp1Adata_for_KD.csv")                        # read the first data set
+dat2 <- read.csv("Exp1Bdata_for_KD.csv")                       # read the second data set
+
+head(dat1)              # see the first 10 observation of the first data set 
+head(dat2)              # see the first 10 observation of the first data set 
+
+# Looking at the summary statistic 
+summary(dat1$E)
+summary(dat1$D)
+
+# calculate the standard deviation 
+sd(dat1$E)
+sd(dat1$D,na.rm = T)
+
+```
+
+
+## Generate a Hypothetical Data from Logistic Regression Model
+
+Using the **datgen** fuction in the RMPB package, generate a hypothetical data from a logistic regression model. The parameters used
+to generat samples from a normal distribution for the biomarker are taken from the KI67 reproducibility study data.
+
+```{r}
+
+ #norm parameter
+
+  dispar <- c(19.54,15)  # mean and sd from labaratory E
+
+# use the Betas function to get the model parameters
+
+bmrk <- rtruncnorm(10000, a=1, b= 85, dispar[1], dispar[2]) # generate the biomarker to mimic labaratory E
+bmrkquant <- quantile(bmrk)              # quantiles of the generated biomarker
+clinInput1 <- c(log(0.25/0.75),log(0.75/0.25),log(0.75/0.25),log(0.25/0.75)) # clinician input values to repreprent hypothetical bmrk performance
+#clinInput1 <- c(log(0.25/0.75),log(0.75/0.25),log(0.60/0.40),log(0.30/0.70)) # clinician input values
+ 
+
+# get the model parameters to be used for generating data
+
+ coeffmod <- cl2mp(clinInput1,c(bmrkquant[2],bmrkquant[4]))   # model parameters
+ coeffmod <- round(coeffmod,digits = 3)
+
+ # biomarker used to mimic the ontotype Dx recurrence score
+
+     varerr <- 36.0              # variance of the error term ( obtained as a difference between lab D and lab E )
+     sderr <- sqrt(varerr)      # standard deviation of the error term
+     coff <- coeffmod           # coefficient to start the simulation to generate data
+     dpar1 <- c(19.54,15,sderr)
+     dpar2 <- c(19.54,225)     # mean and variance of the biomarker from lab E
+
+
+ # generate data
+
+     mydat <- datgen(500,300,coff,dpar1) # generate 500 data set each with 300 samples 
+     mydat1 <-  head(mydat[[1]])        # subset the first data  set  
+                head(mydat1)          # look at the first 10 observation from the first data set
+
+
+
+```
+
+
+## Estiamte $\Theta$ under the Gold standard biomarker
+
+
+```{r}
+
+# estimate theta from x
+
+ casex1 <- lapply(mydat, thetags,dpar2)
+ casex2 <- do.call("rbind",casex1)
+ thetax <- c(round(colMeans(casex2),digits = 3))
+ thetax
+
+```
+
+
+## Estiamte $\Theta$ under the Modified biomarker
+
+```{r}
+ # estimate theta for the modified biomarker
+
+
+ casemc1 <- lapply(mydat,thetama)
+ casemc2 <- do.call("rbind",casemc1)
+ thetamod <- c(round(colMeans(casemc2),digits = 3))
+ thetamod
+ 
+```
+
+# Estimating the Reproducibility metric $\Delta_r$
+
+```{r}
+# estimating delta
+
+ delta10 <- lapply(mydat,delta4r,dpar2)
+ delta10 <- do.call("rbind",delta10)
+ delta11 <- c(round(colMeans(delta10),digits = 3))
+ delta11
+```
+
