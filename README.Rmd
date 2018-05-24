@@ -10,8 +10,8 @@ Reproducibility Metric for Predictive Biomarkers package.
 
 ## Description
 This is an R package consisting of a set of functions used to estimate a
-reproducibility metric $\Delta_r$. First a metric $\tetha$ under the gold standard
-biomarker is estimated. Then $\theta$ under the modified biomarker is estimated.
+reproducibility metric $\Delta_r$. First a metric $\Theta_{gs}$ under the gold standard
+biomarker is estimated. Then $\Theta_{md}$ under the modified biomarker is estimated.
 The reproducibility metrix then will be the difference between these two values.
 
 
