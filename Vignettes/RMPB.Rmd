@@ -24,7 +24,7 @@ The package consisits of several functions that help to caculate the reproducibi
 
 ## Intended audience and goal of the package
 
-The main audience of this package are individuals who want to learn how to evaluate the clinical utility of a predictive biomarker. Though it is not a necessary requirement, but having some basic background about predictive biomarkers and their assesment statistical methods can facilitate understanding this package with ease. Audience who are more interested to know about the statistical methods used can read the paper at.......
+The main audience of this package are individuals who want to learn how to evaluate the clinical utility of a predictive biomarker. Though it is not a necessary requirement, but having some basic background about predictive biomarkers and their assesment statistical methods can facilitate understanding this package with ease. Audience who are more interested to know about the statistical methods used can read  [Janes et. al paper](https://www.ncbi.nlm.nih.gov/pubmed/24695044).
 
 
 ## Using this package

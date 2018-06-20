@@ -57,7 +57,7 @@ datgen <- function(m, n, coeff, dpar) {
                  (1+exp(coeff[1]+coeff[2]*xx[,i]+coeff[3]*A[,i]+coeff[4]*z1[,i]))
 
 
-    #Caluate the outcome for a given probability p   q
+    #Caluate the outcome for a given probability p
     outcome1[,i] <- rbinom(n, 1, mylog1[,i]) ;
 
     myreturn[[i]] <- data.frame(outcome1[,i], A[,i], xx[,i], ww[,i], xnew[,i], z1[,i], z2[,i], z3[,i])
